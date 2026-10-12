@@ -1,4 +1,3 @@
-
 name: Logicwind CI
 
 on:
@@ -38,6 +37,21 @@ jobs:
     name: Test backend
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: logicwind_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d logicwind_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: backend
@@ -62,6 +76,12 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed test database
+        run: npm run prisma:seed
 
       - name: Run backend tests
         run: npm test
