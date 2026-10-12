@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  fullName     String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("USER") // USER, ADMIN
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
+
+  @@map("users")
+}
+
+model Service {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  icon        String?
+  category    String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id               String   @id @default(uuid())
+  bookingReference String   @unique
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName     String
+  customerEmail    String
+  phone            String
+  serviceId        String
+  service          Service  @relation(fields: [serviceId], references: [id])
+  requestedDate    String
+  timeSlot         String
+  description      String
+  notes            String?
+  status           String   @default("REQUESTED") // REQUESTED, CONFIRMED, COMPLETED, CANCELLED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([customerEmail])
+  @@index([userId])
+  @@index([status])
+  @@map("bookings")
+}
+
+model SupportEnquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  category  String
+  message   String
+  status    String   @default("PENDING") // PENDING, RESOLVED, CLOSED
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([status])
+  @@map("support_enquiries")
+}

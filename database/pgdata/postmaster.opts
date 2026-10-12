@@ -1,0 +1,1 @@
+/usr/lib/postgresql/16/bin/postgres "-D" "/home/nikhil-singh/projects/railflow/database/pgdata" "-p" "5433" "-k" "/home/nikhil-singh/projects/railflow/database"
